@@ -27,6 +27,13 @@ async function run() {
       const tools = await cursor.toArray();
       res.send(tools);
     });
+
+    app.get('/tool/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const tool = await toolCollection.findOne(query);
+      res.send(tool);
+    });
   } finally {
     // some kind of that stop this function
   }
