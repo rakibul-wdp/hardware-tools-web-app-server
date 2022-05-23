@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -19,6 +19,7 @@ async function run() {
   try {
     await client.connect();
     const toolCollection = client.db('hardware_tools').collection('tools');
+    const orderCollection = client.db('hardware_tools').collection('orders');
 
     // load tools data
     app.get('/tool', async (req, res) => {
@@ -33,6 +34,28 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const tool = await toolCollection.findOne(query);
       res.send(tool);
+    });
+
+    // update available quantity
+    app.put('/tool/:id', async (req, res) => {
+      const id = req.params.id;
+      const availableQuantity = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          availableQuantity: availableQuantity.availableQuantity,
+        },
+      };
+      const result = await toolCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+
+    // post order data
+    app.post('/order', async (req, res) => {
+      const order = req.body;
+      const result = await orderCollection.insertOne(order);
+      res.send(result);
     });
   } finally {
     // some kind of that stop this function
