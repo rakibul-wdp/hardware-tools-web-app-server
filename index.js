@@ -15,7 +15,22 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-async function run() {}
+async function run() {
+  try {
+    await client.connect();
+    const toolCollection = client.db('hardware_tools').collection('tools');
+
+    // load tools data
+    app.get('/tool', async (req, res) => {
+      const query = {};
+      const cursor = toolCollection.find(query);
+      const tools = await cursor.toArray();
+      res.send(tools);
+    });
+  } finally {
+    // some kind of that stop this function
+  }
+}
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
