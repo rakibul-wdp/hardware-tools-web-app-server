@@ -20,6 +20,7 @@ async function run() {
     await client.connect();
     const toolCollection = client.db('hardware_tools').collection('tools');
     const orderCollection = client.db('hardware_tools').collection('orders');
+    const userCollection = client.db('hardware_tools').collection('users');
 
     // load tools data
     app.get('/tool', async (req, res) => {
@@ -55,6 +56,27 @@ async function run() {
     app.post('/order', async (req, res) => {
       const order = req.body;
       const result = await orderCollection.insertOne(order);
+      res.send(result);
+    });
+
+    // get orders data
+    app.get('/order', async (req, res) => {
+      const customerEmail = req.query.customerEmail;
+      const query = { customerEmail: customerEmail };
+      const orders = await orderCollection.find(query).toArray();
+      res.send(orders);
+    });
+
+    // store user data
+    app.put('/user/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
       res.send(result);
     });
   } finally {
