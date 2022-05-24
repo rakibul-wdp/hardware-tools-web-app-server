@@ -160,6 +160,12 @@ async function run() {
       res.send(result);
     });
 
+    // get all order data
+    app.get('/order', verifyJWT, verifyAdmin, async (req, res) => {
+      const orders = await orderCollection.find().toArray();
+      res.send(orders);
+    });
+
     // store user data
     app.put('/user/:email', async (req, res) => {
       const email = req.params.email;
