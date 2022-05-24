@@ -107,6 +107,17 @@ async function run() {
       const users = await userCollection.find().toArray();
       res.send(users);
     });
+
+    // create put api for make admin
+    app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updateDoc = {
+        $set: { role: 'admin' },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
   } finally {
     // some kind of that stop this function
   }
