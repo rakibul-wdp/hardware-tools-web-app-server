@@ -79,6 +79,13 @@ async function run() {
       res.send(result);
     });
 
+    // post tool data
+    app.post('/tool', async (req, res) => {
+      const tool = req.body;
+      const result = await toolCollection.insertOne(tool);
+      res.send(result);
+    });
+
     // post order data
     app.post('/order', async (req, res) => {
       const order = req.body;
