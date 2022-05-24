@@ -86,6 +86,14 @@ async function run() {
       res.send(result);
     });
 
+    // delete tool data
+    app.delete('/tool/:id', verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await toolCollection.deleteOne(filter);
+      res.send(result);
+    });
+
     // post order data
     app.post('/order', async (req, res) => {
       const order = req.body;
