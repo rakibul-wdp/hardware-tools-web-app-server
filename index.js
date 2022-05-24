@@ -136,6 +136,30 @@ async function run() {
       res.send(order);
     });
 
+    // update property with patch api
+    app.patch('/order/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const paid = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          status: 'pending',
+          transactionId: paid.transactionId,
+        },
+      };
+      const updateOrder = await orderCollection.updateOne(filter, updatedDoc);
+      res.send(updateOrder);
+    });
+
+    // delete order data
+    app.delete('/order/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(filter);
+      res.send(result);
+    });
+
     // store user data
     app.put('/user/:email', async (req, res) => {
       const email = req.params.email;
