@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -48,6 +49,19 @@ async function run() {
         res.status(403).send({ message: 'forbidden' });
       }
     };
+
+    // payment relate post api
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+      const service = req.body;
+      const price = service.totalPrice;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card'],
+      });
+      res.send({ clientSecret: paymentIntent.client_secret });
+    });
 
     // load tools data
     app.get('/tool', async (req, res) => {
@@ -112,6 +126,14 @@ async function run() {
       } else {
         return res.status(403).send({ message: 'forbidden access' });
       }
+    });
+
+    // get order by unique id
+    app.get('/order/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const order = await orderCollection.findOne(query);
+      res.send(order);
     });
 
     // store user data
