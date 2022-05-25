@@ -38,6 +38,7 @@ async function run() {
     const toolCollection = client.db('hardware_tools').collection('tools');
     const orderCollection = client.db('hardware_tools').collection('orders');
     const userCollection = client.db('hardware_tools').collection('users');
+    const profileCollection = client.db('hardware_tools').collection('profiles');
 
     // verify admin function
     const verifyAdmin = async (req, res, next) => {
@@ -226,6 +227,19 @@ async function run() {
       const user = await userCollection.findOne({ email: email });
       const isAdmin = user.role === 'admin';
       res.send({ admin: isAdmin });
+    });
+
+    // get user profile data
+    app.get('/profile', verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      const decodedEmail = req.decoded.email;
+      if (email === decodedEmail) {
+        const query = { email: email };
+        const profiles = await profileCollection.find(query).toArray();
+        res.send(profiles);
+      } else {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
     });
   } finally {
     // some kind of that stop this function
