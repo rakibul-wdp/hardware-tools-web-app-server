@@ -241,6 +241,26 @@ async function run() {
         return res.status(403).send({ message: 'forbidden access' });
       }
     });
+
+    // send user profile data to server
+    app.post('/updateProfile', async (req, res) => {
+      const profile = req.body;
+      const result = await profileCollection.insertOne(profile);
+      res.send(result);
+    });
+
+    // update user profile data to server
+    app.put('/updateProfile/:id', async (req, res) => {
+      const id = req.params.id;
+      const profile = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: profile,
+      };
+      const result = await profileCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
   } finally {
     // some kind of that stop this function
   }
