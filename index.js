@@ -39,6 +39,7 @@ async function run() {
     const orderCollection = client.db('hardware_tools').collection('orders');
     const userCollection = client.db('hardware_tools').collection('users');
     const profileCollection = client.db('hardware_tools').collection('profiles');
+    const reviewCollection = client.db('hardware_tools').collection('reviews');
 
     // verify admin function
     const verifyAdmin = async (req, res, next) => {
@@ -260,6 +261,19 @@ async function run() {
       };
       const result = await profileCollection.updateOne(filter, updateDoc, options);
       res.send(result);
+    });
+
+    // send reviews data on database
+    app.post('/review', verifyJWT, async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+
+    // load review data
+    app.get('/review', async (req, res) => {
+      const reviews = await reviewCollection.find().toArray();
+      res.send(reviews);
     });
   } finally {
     // some kind of that stop this function
