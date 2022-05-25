@@ -128,6 +128,27 @@ async function run() {
       }
     });
 
+    // get all order data
+    app.get('/allOrder', async (req, res) => {
+      const orders = await orderCollection.find().toArray();
+      res.send(orders);
+    });
+
+    // update order payment status
+    app.put('/allOrder/:id', async (req, res) => {
+      const id = req.params.id;
+      const status = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: 'shipped',
+        },
+      };
+      const result = await orderCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+
     // get order by unique id
     app.get('/order/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
@@ -158,12 +179,6 @@ async function run() {
       const filter = { _id: ObjectId(id) };
       const result = await orderCollection.deleteOne(filter);
       res.send(result);
-    });
-
-    // get all order data
-    app.get('/order', verifyJWT, verifyAdmin, async (req, res) => {
-      const orders = await orderCollection.find().toArray();
-      res.send(orders);
     });
 
     // store user data
