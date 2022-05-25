@@ -129,13 +129,13 @@ async function run() {
     });
 
     // get all order data
-    app.get('/allOrder', async (req, res) => {
+    app.get('/allOrder', verifyJWT, verifyAdmin, async (req, res) => {
       const orders = await orderCollection.find().toArray();
       res.send(orders);
     });
 
     // update order payment status
-    app.put('/allOrder/:id', async (req, res) => {
+    app.put('/allOrder/:id', verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const status = req.body;
       const filter = { _id: ObjectId(id) };
@@ -146,6 +146,14 @@ async function run() {
         },
       };
       const result = await orderCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+
+    // delete unpaid order
+    app.delete('/allOrder/:id', verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(filter);
       res.send(result);
     });
 
